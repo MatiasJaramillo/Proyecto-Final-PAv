@@ -14,7 +14,6 @@ private:
     QScatter3DSeries *serieDatos;
     QScatterDataProxy *datosProxy;
     QScatterDataArray *arregloDatos;
-    QVector3D datosPI;
 public:
     ModificadorDatos(Q3DScatter*);
     ~ModificadorDatos();
