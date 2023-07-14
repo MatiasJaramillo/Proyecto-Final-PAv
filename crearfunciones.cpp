@@ -15,6 +15,9 @@ CrearFunciones::CrearFunciones(){
 }
 void CrearFunciones::setX(int x){
     delete dataX;
+    dataX=new QScatterDataArray;
+    dataX->resize(100);
+    ptrDataArrayX=&dataX->first();
     if(x==0){
         for (float i = -limit; i < limit; i++) {
             for (float j = -limit; j < limit; j++) {
@@ -58,6 +61,9 @@ void CrearFunciones::setX(int x){
 }
 void CrearFunciones::setY(int y){
     delete dataY;
+    dataY=new QScatterDataArray;
+    dataY->resize(100);
+    ptrDataArrayY=&dataY->first();
     if(y==0){
         for (float i = -limit; i < limit; i++) {
             for (float j = -limit; j < limit; j++) {
@@ -101,6 +107,9 @@ void CrearFunciones::setY(int y){
 }
 void CrearFunciones::setZ(int z){
     delete dataZ;
+    dataZ=new QScatterDataArray;
+    dataZ->resize(100);
+    ptrDataArrayZ=&dataZ->first();
     if(z==0){
         for (float i = -limit; i < limit; i++) {
             for (float j = -limit; j < limit; j++) {
