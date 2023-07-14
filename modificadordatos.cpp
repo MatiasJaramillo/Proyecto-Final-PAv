@@ -1,6 +1,8 @@
 #include "modificadordatos.h"
 #include <QtDataVisualization>
-//QScatter3DSeries *datosScatter
+#include <exception>
+#include <iostream>
+using namespace std;
 
 ModificadorDatos::ModificadorDatos(Q3DScatter *grafica){
     graficaPC=nullptr;
@@ -22,29 +24,6 @@ ModificadorDatos::ModificadorDatos(Q3DScatter *grafica){
     serieDatos->setItemLabelFormat(QStringLiteral("@xTitle: @xLabel yTitle: @yLabel @zTitle: @zLabel"));
     serieDatos->setMeshSmooth(false);
     graficaPC->addSeries(serieDatos);
-
-    /*graficaPC->axisX()->setTitle("X");
-    graficaPC->axisY()->setTitle("Y");
-    graficaPC->axisZ()->setTitle("Z");
-
-    int m_itemCount=100;
-    int m_curveDivider=10;
-
-    arregloDatos = new QScatterDataArray;
-    arregloDatos->resize(m_itemCount);
-    QScatterDataItem *ptrToDataArray = &arregloDatos->first();
-
-    float limit = qSqrt(m_itemCount) / 2.0f;
-    for (float i = -limit; i < limit; i++) {
-        for (float j = -limit; j < limit; j++) {
-            ptrToDataArray->setPosition(QVector3D(i + 0.5f,
-                                                  qCos(qDegreesToRadians((i * j) / m_curveDivider)),
-                                                  j + 0.5f));
-            ptrToDataArray++;
-        }
-    }
-
-    graficaPC->seriesList().at(0)->dataProxy()->resetArray(arregloDatos);*/
 }
 ModificadorDatos::~ModificadorDatos(){
     delete graficaPC;
@@ -53,21 +32,28 @@ ModificadorDatos::~ModificadorDatos(){
     delete arregloDatos;
 }
 void ModificadorDatos::clearDatos(){
-    //try,throw,and catch para cuando no hay una list existente.
-    //puede ser aqui
-    int longitudScatter = graficaPC->seriesList().length();
-    if(graficaPC->seriesList().length()==0){
-        return;
-    }
-    else{
-        for(int i=0;i<longitudScatter;i++){
-            graficaPC->removeSeries(graficaPC->seriesList().at(0)); //Elimina todas las series de la grafica
+    try{
+        while (!graficaPC->seriesList().isEmpty()) {
+            graficaPC->removeSeries(graficaPC->seriesList().last());
+        }
+
+        delete arregloDatos;
+        arregloDatos=nullptr;
+        if(graficaPC->seriesList().isEmpty()){
+            throw runtime_error("Lista vacia");
         }
     }
-    delete arregloDatos;
+    catch(const exception& e){
+        cout<<e.what()<<endl;
+        return;
+    }
 }
 void ModificadorDatos::crearGrafica(int x, int y, int z){
-    //clearDatos();
+    clearDatos();
+
+    QScatter3DSeries* newSeries = new QScatter3DSeries;
+    serieDatos=newSeries;
+    graficaPC->addSeries(serieDatos);
 
     graficaPC->axisX()->setTitle("X");
     graficaPC->axisY()->setTitle("Y");
@@ -76,24 +62,34 @@ void ModificadorDatos::crearGrafica(int x, int y, int z){
     int itemCount=100;
     int limit=5;
 
-    arregloDatos = new QScatterDataArray;
+    QScatterDataArray *updateArray = new QScatterDataArray;
+    arregloDatos=updateArray;
     arregloDatos->resize(itemCount);
     QScatterDataItem *ptrToDataArray = &arregloDatos->first();
 
-    //problema puede ser aqui
     setX(x);
     setY(y);
     setZ(z);
 
-    //puede ser aqui
     QScatterDataArray *dataX=getX();
     QScatterDataArray *dataY=getY();
     QScatterDataArray *dataZ=getZ();
-    QScatterDataItem *ptrDataArrayX = &dataX->first();
-    QScatterDataItem *ptrDataArrayY = &dataY->first();
-    QScatterDataItem *ptrDataArrayZ = &dataZ->first();
+    QScatterDataItem *ptrDataArrayX = nullptr;
+    QScatterDataItem *ptrDataArrayY = nullptr;
+    QScatterDataItem *ptrDataArrayZ = nullptr;
 
-    //puede ser aqui
+    if (!dataX->isEmpty()) {
+        ptrDataArrayX = &dataX->first();
+    }
+
+    if (!dataY->isEmpty()) {
+        ptrDataArrayY = &dataY->first();
+    }
+
+    if (!dataZ->isEmpty()) {
+        ptrDataArrayZ = &dataZ->first();
+    }
+
     for(int i = 0; i < 100; i++){
         QVector3D vector;
         vector+=ptrDataArrayX->position();
@@ -105,5 +101,7 @@ void ModificadorDatos::crearGrafica(int x, int y, int z){
         ptrDataArrayY++;
         ptrDataArrayZ++;
     }
+    cout<<"problema"<<endl;
+
     graficaPC->seriesList().at(0)->dataProxy()->resetArray(arregloDatos);
 }
